@@ -9,10 +9,22 @@ FormContentV1 applicantForm = api.getVariable("applicantForm") as FormContentV1
 
 // recipient
 // this is the postfach handle of the 'testUserPST' user on the integration system of bund.id
-api.setVariable("messageRecipient", '{"@type":"nkb","id":"c8fab851-1207-4a8a-8a7f-6af61173ff01"}')
+String workshopGroup = applicantForm.fields."mainGroup:0:workshopGroup".value
+String recipient
+assert workshopGroup != null && !workshopGroup.isAllWhitespace()
+switch (workshopGroup) {
+  case "taxi":
+    recipient = '{"@type":"nkb","id":"9ad8311b-d3d6-4570-9326-b8bd5f7f44c1"}' // "Simones public service team" on int.bund.id
+    break
+  case "strasse":
+    recipient = '{"@type":"nkb","id":"c8fab851-1207-4a8a-8a7f-6af61173ff01"}' // "testUserPST" on int.bund.id
+    break
+  default:
+    throw new IllegalArgumentException("Unknown workshop Group '$workshopGroup'.")
+}
+api.setVariable("messageRecipient", recipient)
 
 // subject
-String workshopGroup = applicantForm.fields."mainGroup:0:workshopGroup".value
 String teamName = applicantForm.fields."mainGroup:0:teamName".value
 String subject = "GovTecEvent 2024: ${workshopGroup}-Gruppe: $teamName"
 api.setVariable("messageSubject", subject)
